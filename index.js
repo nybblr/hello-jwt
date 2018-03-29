@@ -1,11 +1,12 @@
 const http = require('http');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const {
   findUserByEmail
-} = require('./database.js');
+} = require('./database');
 
-const secret = '1mm@_s3rv3r_p@ssw0rd';
+const signature = '1mm@_s3cur3_s3rv3r';
 
 let readBody = request =>
   new Promise(resolve => {
@@ -20,21 +21,25 @@ let readBody = request =>
 
 // Create JWT for user
 let createToken = user =>
-  jwt.sign({
-    userId: user.id,
-  }, secret, { expiresIn: '7d' });
+  jwt.sign(
+    { userId: user.id },
+    signature,
+    { expiresIn: '7d' }
+  );
 
 // POST /tokens
 let postTokens = async (req, res) => {
-  let body = JSON.parse(await readBody(req));
-  let { email, password } = body;
-  let user = findUserByEmail(body.email);
+  let body = await readBody(req);
+  let creds = JSON.parse(body);
+  let { email, password } = creds;
+  let user = findUserByEmail(email);
 
-  if (user && password === user.password) {
+  let isValid = await bcrypt.compare(password, user.password);
+  if (isValid) {
     let token = createToken(user);
-    res.end(JSON.stringify({ token }));
+    res.end(token);
   } else {
-    res.end(JSON.stringify({ error: 'No token for you!' }));
+    res.end('No token for you!');
   }
 };
 
@@ -43,13 +48,14 @@ let privatePage = (req, res) => {
   let { authorization: token } = req.headers;
   let payload;
   try {
-    payload = jwt.verify(token, secret);
+    payload = jwt.verify(token, signature);
   } catch(err) {
-    // so what
+    // catch the error
   }
 
   if (payload) {
-    res.end(`Muahaha private, welcome user #${payload.userId}`);
+    let { userId } = payload;
+    res.end(`Muahaha welcome to the club, user #${userId}`);
   } else {
     res.end('YOU SHALL NOT PASS');
   }

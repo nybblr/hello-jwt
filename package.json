@@ -6,10 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nybblr/hello-jwt.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nybblr/hello-jwt/issues"
+  },
+  "homepage": "https://github.com/nybblr/hello-jwt#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "jsonwebtoken": "^8.2.0"
   }
 }

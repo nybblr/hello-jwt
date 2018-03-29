@@ -3,12 +3,12 @@ let users = {
   'joe@smith.com': {
     id: 3,
     email: 'joe@smith.com',
-    password: 'mylittlepassword'
+    password: '$2a$10$bGFGwRz.qQybLuFJPptWR.RyDZCIiVRtA2EYvhsNq9vMMrdVUVXLe',
   },
   'joe@bloggs.com': {
     id: 5,
     email: 'joe@bloggs.com',
-    password: 'test1234'
+    password: '$2a$10$Un40mZ9Qs34LAPL56QMv2.NK09yhb3Coq76/jlC6nNGQdLsZW5Zy2',
   },
 };
 
