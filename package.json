@@ -19,6 +19,9 @@
   "homepage": "https://github.com/nybblr/hello-jwt#readme",
   "dependencies": {
     "bcrypt": "^1.0.3",
-    "jsonwebtoken": "^8.2.0"
+    "jsonwebtoken": "^8.2.0",
+    "koa": "^2.5.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-router": "^7.4.0"
   }
 }
