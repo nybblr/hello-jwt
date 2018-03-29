@@ -1,4 +1,3 @@
-const http = require('http');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -7,17 +6,6 @@ const {
 } = require('./database');
 
 const signature = '1mm@_s3cur3_s3rv3r';
-
-let readBody = request =>
-  new Promise(resolve => {
-    let body = '';
-    request.on('data', chunk => {
-      body += chunk.toString();
-    });
-    request.on('end', () => {
-      resolve(body);
-    });
-  });
 
 // Create JWT for user
 let createToken = user =>
@@ -29,22 +17,24 @@ let createToken = user =>
 
 // POST /tokens
 let postTokens = async (req, res) => {
-  let body = await readBody(req);
-  let creds = JSON.parse(body);
-  let { email, password } = creds;
+  let { email, password } = req.body;
   let user = findUserByEmail(email);
 
   let isValid = await bcrypt.compare(password, user.password);
   if (isValid) {
     let token = createToken(user);
-    res.end(token);
+    res.send(token);
   } else {
-    res.end('No token for you!');
+    res.send('No token for you!');
   }
 };
 
-// GET /private
+// GET /api/private
 let privatePage = (req, res) => {
+  res.send(`Muahaha welcome to the club, user #${req.jwt.userId}`);
+};
+
+let checkToken = async (req, res, next) => {
   let { authorization: token } = req.headers;
   let payload;
   try {
@@ -54,22 +44,29 @@ let privatePage = (req, res) => {
   }
 
   if (payload) {
-    let { userId } = payload;
-    res.end(`Muahaha welcome to the club, user #${userId}`);
+    req.jwt = payload;
+    next();
   } else {
-    res.end('YOU SHALL NOT PASS');
+    res.send('YOU SHALL NOT PASS');
   }
 };
 
-let routes = {
-  'POST /tokens': postTokens,
-  'GET /private': privatePage,
-};
+const express = require('express');
+const Router = express.Router;
+const bodyParser = require('body-parser');
 
-let server = http.createServer((req, res) => {
-  let { url, method } = req;
-  let route = `${method} ${url}`;
-  routes[route](req, res);
-});
+let app = express();
+let router = new Router();
 
-server.listen(3000);
+let tokensAPI = new Router();
+tokensAPI.post('/', postTokens);
+
+let api = new Router();
+api.get('/private', privatePage);
+
+router.use('/tokens', tokensAPI);
+router.use('/api', checkToken, api);
+
+app.use(bodyParser.json());
+app.use(router);
+app.listen(3000);
